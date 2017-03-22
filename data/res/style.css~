@@ -1,0 +1,9 @@
+//The code is licensed under GNU GPLv3.
+
+.nopadding {
+  padding: 0 0 0 0 !important;
+}
+
+.reading {
+  font-size: 2em !important;
+}
