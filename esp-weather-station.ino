@@ -120,6 +120,7 @@ void setup ( void ) {
   Serial.begin ( 115200 );
   Serial.println(debug()+"System start");
   WiFi.mode(WIFI_OFF);
+  //if (!
   setupLocal();
   setupAP();
   /*  Serial.print (debug()+"Connected to " );
@@ -134,7 +135,7 @@ void setup ( void ) {
   setupMeters();
   if (SPIFFS.begin()) Serial.println(debug()+"FS mounted successfully.");
 
-  //startUpTime = SgetTime();
+  startUpTime = SgetTime();
 
   server.on ( "/", []() {
     Serial.println(debug()+"Requested /");

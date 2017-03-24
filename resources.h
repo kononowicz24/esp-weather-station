@@ -88,8 +88,12 @@ String SgetDrawGraph(int reading) { //TODO: refactor
 
 String SgetTime() {
   WiFiClient client;
-  while (!!!client.connect("google.com", 80)) {
+  int attempts = 0;
+  while (true) {
     Serial.println("connection failed, retrying...");
+    attempts++;
+    if (client.connect("google.com",80)) break;
+    if (attempts>3) return "";
   }
 
   client.print("HEAD / HTTP/1.1\r\n\r\n");
@@ -150,14 +154,16 @@ void setupAP() {
   Serial.println(debug()+" > >  softAP MAC address:"+WiFi.softAPmacAddress());
 }
 
-void setupLocal() {
+bool setupLocal() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid,password);
   int attempts = 0;
-  while (!(WiFi.status() != WL_CONNECTED) || (attempts<20)) {//while (true)
-    delay ( 50 );
+  while (true) {//while (true)
+    delay ( 250 );
     Serial.print ( "." );
     attempts++;
+    if (!(WiFi.status() != WL_CONNECTED)) break;
+    if (attempts>20) break;
   }
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println ( "" );
@@ -165,8 +171,10 @@ void setupLocal() {
     Serial.println ( ssid );
     Serial.print (debug()+"IP address: " );
     Serial.println ( WiFi.localIP() );
+    return true;
   } else {
     Serial.println("\n"+debug()+"Local connection not established");
+    return false;
   }
 }
 
