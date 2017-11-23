@@ -38,4 +38,14 @@ char cCS[ILOSC_POMIAROW][9];
 
 boolean softap=0;
 
+bool radioNumber = 0;
+byte addresses[][6] = {"1Node","2Node"};
+
+struct query {
+  char co;
+  //char date[11];
+  byte hh;
+  byte mm;
+  byte ss;
+
 #endif

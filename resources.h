@@ -6,6 +6,7 @@
 #include "globals.h"
 
 String SgetDrawGraph(int reading);
+String debug();
 
 String SgetCurrentText() {
   String a = String("");
@@ -24,6 +25,7 @@ String SgetLayout() {
   "<head>"
     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>"
     "<meta charset=\"utf-8\"/>"
+    "<noscript><meta http-equiv=\"refresh\" content=\"5\"></noscript>"
     "<script type=\"text/javascript\" src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js\"></script>"
     "<script type=\"text/javascript\" src=\"/res/script.js\"></script>"
     "<link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css\" integrity=\"sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7\" crossorigin=\"anonymous\">"
@@ -86,6 +88,12 @@ String SgetDrawGraph(int reading) { //TODO: refactor
   return out;
 }
 
+String SgetDrawGraph(int reading, int reading2) {
+  return "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 600 300\" >\n"
+  "<rect width=\"600\" height=\"300\" fill=\"rgb(250, 230, 210)\" stroke-width=\"1\" stroke=\"rgb(0, 0, 0)\" />\n"
+  ;
+}
+
 String SgetTime() {
   WiFiClient client;
   int attempts = 0;
@@ -112,6 +120,7 @@ String SgetTime() {
                 client.read();
                 String theDate = client.readStringUntil('\r');
                 client.stop();
+                Serial.println(debug()+theDate);
                 return theDate;
               }
             }

@@ -5,6 +5,9 @@
 #include <Wire.h>
 #include "i2c.h"
 
+#include <SPI.h>
+#include "RF24.h"
+
 #include "i2c_BMP280.h"
 
 #include <list>
@@ -29,6 +32,7 @@ long long lastReadingMillis;
 
 HTU21D mierniczek;
 BMP280 bmp280;
+RF24 radio(D4,D8);
 
 ESP8266WebServer server(80);
 
@@ -89,6 +93,32 @@ void reading() {
   calculateStats();
 
 }
+unsigned int i=0;
+void respondTime() {
+  if( radio.available()){
+      query request;                                                              // Variable for the received timestamp
+      while (radio.available()) {                                   // While there is data ready
+        radio.read( &request, sizeof(query) );             // Get the payload
+      }
+
+      radio.stopListening();// First, stop listening so we can talk
+      query okResponse; okResponse.co='o';
+      Serial.print(debug()+"Sending response ");
+      Serial.print(okResponse.co);
+      Serial.print(okResponse.mm);
+      radio.write( &okResponse, sizeof(query) );              // Send the final one back.
+      Serial.println(debug()+" Sent response ");
+      //okResponse.date="2017 07 03"; okResponse.co='d';
+      query okResult; okResult.co='c'; okResult.mm=i;
+      delay(2000);
+      Serial.print(debug()+"Sending response ");
+      Serial.print(okResult.co);
+      Serial.print(okResult.mm);
+      radio.write( &okResult, sizeof(query) );
+      radio.startListening();                                       // Now, resume listening so we catch the next packets.
+      Serial.println(debug()+" Sent response ");i++;
+   }
+}
 
 void setupMeters() {
   mierniczek.begin();
@@ -135,6 +165,27 @@ void setup ( void ) {
   setupMeters();
   if (SPIFFS.begin()) Serial.println(debug()+"FS mounted successfully.");
 
+  
+  radio.begin();
+
+  // Set the PA Level low to prevent power supply related issues since this is a
+ // getting_started sketch, and the likelihood of close proximity of the devices. RF24_PA_MAX is default.
+  radio.setPALevel(RF24_PA_LOW);
+
+  // Open a writing and reading pipe on each radio, with opposite addresses
+  if(radioNumber){
+    radio.openWritingPipe(addresses[1]);
+    radio.openReadingPipe(1,addresses[0]);
+  }else{
+    radio.openWritingPipe(addresses[0]);
+    radio.openReadingPipe(1,addresses[1]);
+  }
+
+  // Start the radio listening for data
+  radio.startListening();
+  Serial.println(debug()+"RF24 is ready to respond.");
+  
+  
   startUpTime = SgetTime();
 
   server.on ( "/", []() {
@@ -159,6 +210,7 @@ void setup ( void ) {
 void loop ( void ) {
   server.handleClient();
   if (millis() > lastReadingMillis + RESOLUTION_TEMP) reading();
+  respondTime();
 }
 
 void drawGraph(int meter) {

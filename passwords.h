@@ -3,7 +3,7 @@
 #ifndef __PASSWORDS_H__
 #define __PASSWORDS_H__
 
-const char *ssid = "SSID HERE";
-const char *password = "PASSWORD HERE";
+const char *ssid = "UPC247602010";
+const char *password = "HFLAZPSY";
 
 #endif
