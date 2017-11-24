@@ -12,6 +12,7 @@
 
 #include <list>
 #include <vector>
+//#include <sstream>
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
@@ -91,8 +92,8 @@ void reading() {
 
   History.push_back(std::vector<float>(cC, cC + sizeof(cC)/sizeof(float)));
   calculateStats();
-
 }
+
 unsigned int i=0;
 void respondTime() {
   if( radio.available()){
@@ -105,15 +106,22 @@ void respondTime() {
       query okResponse; okResponse.co='o';
       Serial.print(debug()+"Sending response ");
       Serial.print(okResponse.co);
-      Serial.print(okResponse.mm);
       radio.write( &okResponse, sizeof(query) );              // Send the final one back.
       Serial.println(debug()+" Sent response ");
-      //okResponse.date="2017 07 03"; okResponse.co='d';
-      query okResult; okResult.co='c'; okResult.mm=i;
-      delay(2000);
+      
+      query okResult; okResult.co='c';
+      String currTempDateTime = SgetTime();
+
+      strncpy(okResult.date, getDateFromString(currTempDateTime).c_str(), sizeof(okResult.date));
+      okResult.date[sizeof(okResult.date) - 1] = 0;
+      strncpy(okResult.hour, getTimeFromString(currTempDateTime).c_str(), sizeof(okResult.hour));
+      okResult.hour[sizeof(okResult.hour) - 1] = 0;
+      
       Serial.print(debug()+"Sending response ");
       Serial.print(okResult.co);
-      Serial.print(okResult.mm);
+      Serial.print(okResult.date);
+      Serial.print(okResult.hour);
+      
       radio.write( &okResult, sizeof(query) );
       radio.startListening();                                       // Now, resume listening so we catch the next packets.
       Serial.println(debug()+" Sent response ");i++;
@@ -188,6 +196,9 @@ void setup ( void ) {
   
   startUpTime = SgetTime();
 
+  Serial.println(getDateFromString(startUpTime).c_str());
+  Serial.println(getTimeFromString(startUpTime).c_str());
+
   server.on ( "/", []() {
     Serial.println(debug()+"Requested /");
     server.send(200, "text/html", SgetLayout());  
@@ -207,13 +218,17 @@ void setup ( void ) {
   Serial.println (debug()+"Done setup.\n\n" );
 }
 
+void drawGraph(int meter) {
+  Serial.println(debug()+"Requested drawGraph("+meter+")");
+  server.send ( 200, "text/html", SgetDrawGraph(meter));
+}
+
 void loop ( void ) {
   server.handleClient();
   if (millis() > lastReadingMillis + RESOLUTION_TEMP) reading();
   respondTime();
 }
 
-void drawGraph(int meter) {
-  Serial.println(debug()+"Requested drawGraph("+meter+")");
-  server.send ( 200, "text/html", SgetDrawGraph(meter));
-}
+
+
+

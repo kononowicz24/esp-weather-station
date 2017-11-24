@@ -44,8 +44,8 @@ byte addresses[][6] = {"1Node","2Node"};
 struct query {
   char co;
   //char date[11];
-  byte hh;
-  byte mm;
-  byte ss;
-
+  char date[12];
+  char hour[9];
+};
 #endif
+

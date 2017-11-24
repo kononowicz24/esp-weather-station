@@ -4,9 +4,10 @@
 #define __RESOURCES_H__
 
 #include "globals.h"
+#include <sstream>
 
-String SgetDrawGraph(int reading);
 String debug();
+
 
 String SgetCurrentText() {
   String a = String("");
@@ -88,7 +89,7 @@ String SgetDrawGraph(int reading) { //TODO: refactor
   return out;
 }
 
-String SgetDrawGraph(int reading, int reading2) {
+String SgetDrawGraph2(int reading, int reading2) {
   return "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 600 300\" >\n"
   "<rect width=\"600\" height=\"300\" fill=\"rgb(250, 230, 210)\" stroke-width=\"1\" stroke=\"rgb(0, 0, 0)\" />\n"
   ;
@@ -98,9 +99,9 @@ String SgetTime() {
   WiFiClient client;
   int attempts = 0;
   while (true) {
+    if (client.connect("time.is",80)) break;
     Serial.println("connection failed, retrying...");
     attempts++;
-    if (client.connect("google.com",80)) break;
     if (attempts>3) return "";
   }
 
@@ -130,6 +131,22 @@ String SgetTime() {
     }
   }
 }// - See more at: http://www.esp8266.com/viewtopic.php?f=29&t=6007&start=5#sthash.yK4yygBY.dpuf
+
+
+std::string getDateFromString(String realTime) {
+  std::string ret;
+  for (int i=8; i<12; i++) ret+=realTime[i];
+  for (int i=5; i<8; i++) ret+=realTime[i];
+  for (int i=12; i<17; i++) ret+=realTime[i];
+  return ret;
+}
+std::string getTimeFromString(String realTime) {
+  std::string ret="";
+  for (int i=17; i<26; i++) {
+    ret+=realTime[i];
+  }
+  return ret;
+}
 
 String precUptimePrint(long a) {
   return String(a/1000)+"."+(a%1000);
@@ -188,4 +205,3 @@ bool setupLocal() {
 }
 
 #endif
-
